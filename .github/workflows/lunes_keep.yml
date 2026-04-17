@@ -3,7 +3,7 @@ name: Lunes-Keep
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 1 */10 * *'   # 北京时间 09:00（UTC+8 → UTC 01:00）
+    - cron: '0 1 * * *'   # 北京时间 09:00（UTC+8 → UTC 01:00）
 
 jobs:
   renew:
