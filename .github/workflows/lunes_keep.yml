@@ -1,5 +1,4 @@
 name: Lunes-Keep
-
 on:
   workflow_dispatch:
   schedule:
@@ -9,9 +8,7 @@ jobs:
   renew:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
-
       - name: 📥 下载私库脚本
         uses: actions/checkout@v4
         with:
@@ -29,11 +26,13 @@ jobs:
 
       - name: 🛠️ 准备 Gost 工具
         run: |
-          wget https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-linux-amd64-2.11.5.gz
-          gunzip gost-linux-amd64-2.11.5.gz
-          chmod +x gost-linux-amd64-2.11.5
-          mv gost-linux-amd64-2.11.5 gost
-          echo "✅ Gost 已就绪"
+          VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
+            | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
+          echo "📦 GOST 版本: $VERSION"
+          wget -q "https://github.com/ginuerzh/gost/releases/download/v${VERSION}/gost_${VERSION}_linux_amd64.tar.gz"
+          tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
+          chmod +x gost
+          echo "✅ GOST 已就绪"
 
       - name: 🛠️ 安装系统依赖
         run: |
