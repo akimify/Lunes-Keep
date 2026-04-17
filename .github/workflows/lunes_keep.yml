@@ -1,15 +1,13 @@
 name: Lunes-Keep
-
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 1 * * *'   # 北京时间 09:00（UTC+8 → UTC 01:00）
 
 jobs:
   renew:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - name: 📥 下载私库脚本
         uses: actions/checkout@v4
@@ -22,13 +20,23 @@ jobs:
         run: mv private/lunes_keep.py lunes_keep.py
 
       - name: 🐍 设置 Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.11'
+
+      - name: 🛠️ 准备 Gost 工具
+        run: |
+          VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
+            | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
+          echo "📦 GOST 版本: $VERSION"
+          wget -q "https://github.com/ginuerzh/gost/releases/download/v${VERSION}/gost_${VERSION}_linux_amd64.tar.gz"
+          tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
+          chmod +x gost
+          echo "✅ GOST 已就绪"
 
       - name: 🛠️ 安装系统依赖
         run: |
-          sudo apt-get update -qq
+          sudo apt-get update
           sudo apt-get install -y \
             google-chrome-stable \
             xvfb \
@@ -40,16 +48,6 @@ jobs:
         run: |
           pip install seleniumbase
           seleniumbase install chromedriver
-
-      - name: 🛡️ 准备 Gost 工具
-        run: |
-          VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
-            | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
-          echo "📦 GOST 版本: $VERSION"
-          wget -q "https://github.com/ginuerzh/gost/releases/download/v${VERSION}/gost_${VERSION}_linux_amd64.tar.gz"
-          tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
-          chmod +x gost
-          echo "✅ GOST 已就绪"
 
       - name: 🚀 运行续期脚本
         env:
