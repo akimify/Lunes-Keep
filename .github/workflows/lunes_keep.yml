@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 1 * * *'   # 北京时间 09:00（UTC+8 → UTC 01:00）
+
 jobs:
   renew:
     runs-on: ubuntu-latest
@@ -14,20 +15,25 @@ jobs:
           repository: ${{ github.repository_owner }}/Lunes-Keep-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
           path: private
+
       - name: 📂 移动脚本到工作目录
         run: mv private/lunes_keep.py lunes_keep.py
+
       - name: 🐍 设置 Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      - name: 🛡️ 下载 GOST
+          python-version: '3.11'
+
+      - name: 🛠️ 准备 Gost 工具
         run: |
-          VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
+          VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
+            | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
           echo "📦 GOST 版本: $VERSION"
           wget -q "https://github.com/ginuerzh/gost/releases/download/v${VERSION}/gost_${VERSION}_linux_amd64.tar.gz"
           tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
           chmod +x gost
           echo "✅ GOST 已就绪"
+
       - name: 🛠️ 安装系统依赖
         run: |
           sudo apt-get update
@@ -37,18 +43,19 @@ jobs:
             x11-utils \
             xdotool \
             scrot
+
       - name: 🐍 安装 Python 依赖
         run: |
           pip install seleniumbase
           seleniumbase install chromedriver
+
       - name: 🚀 运行续期脚本
         env:
-          PYTHONIOENCODING: utf-8
           LUNES_ACCOUNTS: ${{ secrets.LUNES_ACCOUNTS }}
           TG_BOT:         ${{ secrets.TG_BOT }}
-          GOST_BIN:       ./gost
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python lunes_keep.py
+
       - name: 📸 上传调试截图
         if: always()
         uses: actions/upload-artifact@v4
