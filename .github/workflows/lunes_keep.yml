@@ -27,7 +27,7 @@ jobs:
       - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.GOST_PROXY != '' }}
         env:
-          GOST_PROXY: ${{ secrets.GOST_PROXY }}
+          GOST_PROXY: ${{ secrets.VIRGINIA_PROXY }}
         run: |
           VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
           echo "📦 GOST 版本: $VERSION"
