@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 1 * * *'
-    
+
 jobs:
   run_virginia_keep:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 📥 下载私库脚本
         uses: actions/checkout@v4
@@ -15,15 +15,15 @@ jobs:
           repository: ${{ github.repository_owner }}/Lunes-Keep-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
           path: private
-          
+
       - name: 📂 移动脚本到工作目录
         run: mv private/lunes_keep.py lunes_keep.py
-        
+
       - name: 🐍 设置 Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          
+
       - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.GOST_PROXY != '' }}
         env:
@@ -37,8 +37,8 @@ jobs:
           nohup ./gost -L http://:8080 -F "$GOST_PROXY" > gost.log 2>&1 &
           sleep 3
           echo "✅ GOST 已启动，测试连通性..."
-          curl -s -x http://127.0.0.1:8080 https://api.ipify.org
-          
+          curl -s -x http://127.0.0.1:8080 https://api.ipify.org | sed 's/\([0-9]*\.[0-9]*\.\)[0-9]*\.[0-9]*/\1**.**/g'
+
       - name: 🛠️ 安装系统依赖
         run: |
           sudo apt-get update
@@ -48,12 +48,12 @@ jobs:
             x11-utils \
             xdotool \
             scrot
-            
+
       - name: 🐍 安装 Python 依赖
         run: |
           pip install seleniumbase
           seleniumbase install chromedriver
-          
+
       - name: 🚀 运行脚本
         env:
           PYTHONIOENCODING: utf-8
@@ -62,7 +62,7 @@ jobs:
           TG_BOT: ${{ secrets.TG_BOT }}
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python lunes_keep.py
-      
+
       - name: 📸 上传截图
         if: always()
         uses: actions/upload-artifact@v4
