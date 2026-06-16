@@ -5,7 +5,7 @@ on:
     - cron: '0 1 * * *'
     
 jobs:
-  run_lunes_keep:
+  run_virginia_keep:
     runs-on: ubuntu-latest
     
     steps:
